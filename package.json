@@ -1,0 +1,19 @@
+{
+  "name": "myexpress",
+  "version": "0.0.0",
+  "description": "homework 3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin" : {
+    "myexpress": "bin/myexpress"
+  },
+  "author": "David Lin - Taffyer",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "~1.9.1",
+    "mocha": "~1.19.0",
+    "supertest": "~0.12.1"
+  }
+}
