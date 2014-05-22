@@ -65,7 +65,11 @@ var myexpress = function() {
   app.stack = [];
 
   app.use = function(func){
-    app.stack.push(func);
+    if (func.stack != undefined) {
+      app.stack = app.stack.concat(func.stack);
+    } else {
+      app.stack.push(func);
+    }
   }
 
   return app;

@@ -66,3 +66,5 @@
 不太会写测试。掉了一个坑，before和beforeEach，所以一直通不过自己的测试。
 
     raise new error("boom") => throw new Error("boom")
+
+在Error Handler那里卡了很长很长时间，但是理清楚逻辑以后一想其实还是没那么难的。看了一下Connect的源代码，有一个app.handle的函数，代码确实很短啊。
