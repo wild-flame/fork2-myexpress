@@ -15,7 +15,6 @@ var myexpress = function() {
       if (current_Middleware == undefined) {
         // ruturn 500 for unhandled error
         if (err) {
-          console.error(err);
           response.statusCode = 500;
           response.end("Internal Serve Error");
           return;

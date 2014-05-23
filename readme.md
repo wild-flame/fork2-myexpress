@@ -68,3 +68,9 @@
     raise new error("boom") => throw new Error("boom")
 
 在Error Handler那里卡了很长很长时间，但是理清楚逻辑以后一想其实还是没那么难的。看了一下Connect的源代码，有一个app.handle的函数，代码确实很短啊。
+
+# LESSON 5
+
+关于Prototype
+
+Instance 和 Object

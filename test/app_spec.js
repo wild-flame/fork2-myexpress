@@ -1,6 +1,7 @@
 var express = require("../"), 
     request = require("supertest"),
     http = require("http"),
+    Layer = require("../lib/layer.js"),
     expect = require("chai").expect;
 
 describe("app",function() {
@@ -193,3 +194,33 @@ describe("Implement App Embedding As Middleware", function(){
     request(app).get("/").expect("m1 error").end(done);
   });
 })
+describe("Layer class and the match method", function() {
+  // THIS IS AT THE START OF THE FILE
+  // var Layer = require("../lib/layer.js")
+
+  var layer, m1;
+
+  beforeEach(function(){
+    m1 = function() {};
+    layer = new Layer("/foo",m1);
+  });
+
+
+  it("sets layer.handle to be the middleware", function(){
+    expect(layer.handle).to.eql(m1);
+  });
+
+  it("returns undefined if path doesn't match", function() {
+    expect(layer.match("/bar")).to.be.undefined;
+  });
+
+  it("returns matched path if layer matches the request path exactly", function() {
+    expect(layer.match("/foo")).to.not.be.undefined;
+    expect(layer.match("/foo")).to.be.have.property("path","/foo");
+  });
+  it("returns matched prefix if the layer matches the prefix of the request path", function() {
+    var match = layer.match("/foo/bar");
+    expect(match).to.not.be.undefined;
+    expect(match).to.have.property("path","/foo");
+  });
+});
