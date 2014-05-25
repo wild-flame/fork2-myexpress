@@ -1,5 +1,5 @@
 var http = require("http");
-
+var Layer = require("./lib/layer.js")
 var myexpress = function() {
   var index=0;
   var current_Middleware;
@@ -8,11 +8,17 @@ var myexpress = function() {
 
   var app = function(request, response) {
 
+      console.log("============================");
+
     // The `next` function call which the next middleware 
     var next = function(err){
       index = index + 1;
-      current_Middleware = app.stack[index];
-      if (current_Middleware == undefined) {
+
+      // Uncomment this for dubug
+      // console.log("[CALL `next]");
+
+      current_Layer = app.stack[index];
+      if (current_Layer == undefined) {
         // ruturn 500 for unhandled error
         if (err) {
           response.statusCode = 500;
@@ -25,17 +31,21 @@ var myexpress = function() {
         }
       } 
 
-      try{
-        if (current_Middleware.length < 4 && err == undefined) {
-          current_Middleware(request,response,next);
-        } else if (current_Middleware.length == 4 && err != undefined) {
-          current_Middleware(err,request,response,next);
-        } else {
-          next(err);
+      console.log("app.stack.handle is: " + app.stack[index].handle);
+      console.log("request.url: " + request.url +"\t current_Layer.path :"+  current_Layer.path);
+
+      current_Middleware = current_Layer.handle
+        try{
+          if (current_Middleware.length < 4 && err == undefined && current_Layer.match(request.url)) {
+            current_Middleware(request,response,next);
+          } else if (current_Middleware.length == 4 && err != undefined && current_Layer.match(request.url)) {
+            current_Middleware(err,request,response,next);
+          } else {
+            next(err);
+          }
+        } catch(e) {
+          next(e);
         }
-      } catch(e) {
-        next(e);
-      }
 
     }
 
@@ -46,13 +56,18 @@ var myexpress = function() {
       return;
     }
 
+    // TODO:重构这段代码
     // return 500 for uncaught error
     try{
-      app.stack[0](request,response,next);
+      current_Layer = app.stack[0]
+        if (current_Layer.match(request.url)) {
+          current_Layer.handle(request,response,next);
+        } else {
+          next();
+        }
     } catch(e) {
       next(e);
     }
-
   } 
 
   app.listen = function(port,callback) {
@@ -63,11 +78,21 @@ var myexpress = function() {
 
   app.stack = [];
 
-  app.use = function(func){
-    if (func.stack != undefined) {
-      app.stack = app.stack.concat(func.stack);
+  app.use = function(){
+
+    if (arguments.length == 1) {
+      var path = "/";
+      var middleware = arguments[0];
     } else {
-      app.stack.push(func);
+      var path = arguments[0];
+      var middleware = arguments[1];
+    }
+
+    layer = new Layer(path, middleware);
+    if (middleware.stack != undefined) {
+      app.stack = app.stack.concat(middleware.stack);
+    } else {
+      app.stack.push(layer);
     }
   }
 

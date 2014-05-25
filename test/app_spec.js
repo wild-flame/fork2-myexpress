@@ -224,3 +224,50 @@ describe("Layer class and the match method", function() {
     expect(match).to.have.property("path","/foo");
   });
 });
+
+describe("app.use should add a Layer to stack",function() {
+  var Layer, app
+
+  beforeEach(function() {
+    app = express();
+    // Layer = require("../lib/layer");
+    app.use(function() {});
+    app.use("/foo",function() {});  
+  });
+
+  it("first layer's path should be /", function() {
+    layer = app.stack[0];
+    expect(layer.match("/foo")).to.not.be.undefined;
+  });
+  it("second layer's path should be /foo", function() {
+    layer = app.stack[1];
+    expect(layer.match("/")).to.be.undefined;
+    expect(layer.match("/foo")).to.not.be.undefined;
+  });
+});
+
+describe("The middlewares called should match request path", function(){
+  var app;
+  before(function() {
+    app = express();
+    app.use("/foo",function(req,res,next) {
+      res.end("foo");
+    });
+    app.use("/",function(req,res) {
+      res.end("root");
+    });
+  });
+
+  it("returns root for GET /",function(done) {
+    request(app).get("/").expect("root").end(done);
+  });
+
+  it("returns foo for GET /foo",function(done) {
+    request(app).get("/foo").expect("foo").end(done);
+  });
+
+  it("returns foo for GET /foo/bar",function(done) {
+    request(app).get("/foo/bar").expect("foo").end(done);
+  });
+
+});

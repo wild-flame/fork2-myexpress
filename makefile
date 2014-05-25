@@ -28,11 +28,15 @@ addLayer_m:
 	mocha test -R spec -g 'app.use should add a Layer to stack'
 matchPath_m:
 	mocha test -R spec -g 'The middlewares called should match request path'
-lesson5_t: layerClass_t addLayer_t matchPath_t
+
+lesson5_t: layerClass_t addLayer_t matchPath_t errorHandlerMatch_t
 layerClass_t:
 	mocha verify/app_spec.js -R spec -g 'Layer class and the match method'
 addLayer_t:
 	mocha verify -R spec -g 'app.use should add a Layer to stack'
 matchPath_t:
-	mocha verify -R spec -g 'The middlewares called should match request path'
-	.PHONY: lesson4_t lesson4_m lesson5_t lesson5_m
+	mocha verify -R spec -g 'The middlewares called should match request path:'
+errorHandlerMatch_t:
+	mocha verify -R spec -g 'The error handlers called should match request path:'
+
+.PHONY: lesson4_t lesson4_m lesson5_t lesson5_m

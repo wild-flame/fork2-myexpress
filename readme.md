@@ -63,9 +63,14 @@
 
 # LESSON 4
 
-不太会写测试。掉了一个坑，before和beforeEach，所以一直通不过自己的测试。
+不太会写测试。掉了一个坑，before和beforeEach，所以一直通不过自己的测试。Memo里写错了这个
 
-    raise new error("boom") => throw new Error("boom")
+    raise new error("boom") 
+    
+改成
+
+    throw new Error("boom")
+
 
 在Error Handler那里卡了很长很长时间，但是理清楚逻辑以后一想其实还是没那么难的。看了一下Connect的源代码，有一个app.handle的函数，代码确实很短啊。
 
@@ -74,3 +79,5 @@
 关于Prototype
 
 Instance 和 Object
+
+不知道 request.url 和 request.path 有什么区别
