@@ -16,7 +16,7 @@ var myexpress = function() {
       index = index + 1;
 
       // Uncomment this for dubug
-      console.log("[CALL `next]");
+      // console.log("[CALL `next]");
 
       current_Layer = app.stack[index];
       if (current_Layer == undefined) {
@@ -37,17 +37,18 @@ var myexpress = function() {
       
       // Do something with the request.url 
        
+
       current_Middleware = current_Layer.handle;
+
+      // Let response be able to get params
 
       try{
         if (current_Middleware.length < 4 && err == undefined && current_Layer.match(request.url)) {
           response.params = current_Layer.match(request.url).params;
           current_Middleware(request,response,next);
-          request.url = request.url.substr(current_Layer.pre_path.length) 
         } else if (current_Middleware.length == 4 && err != undefined && current_Layer.match(request.url)) {
           request.params = current_Layer.match(request.url).params;
           current_Middleware(err,request,response,next);
-          request.url = request.url.substr(current_Layer.pre_path.length) 
         } else {
           next(err);
         }
@@ -70,18 +71,7 @@ var myexpress = function() {
     //
     // THE INIT MIDDLEWARE 
     current_Layer = app.stack[0];
-    console.log("current_Layer.path: " + current_Layer.path);
-    console.log("current_Layer.pre_path: " + current_Layer.pre_path);
 
-    console.log("request.url[before]:  " + request.url);
-    console.log("pre_path.length: " + current_Layer.pre_path.length);
-
-    console.log("request.url:  " + request.url);
-
-    if (current_Layer.match(request.url) && current_Layer.subapp = ture) 
-    {  
-        request.url = request.url.substr(current_Layer.pre_path.length) 
-    }
     if (current_Layer.match(request.url)) {
       request.params = current_Layer.match(request.url).params;
     } else {
@@ -91,7 +81,6 @@ var myexpress = function() {
     try{
       if (current_Layer.match(request.url)) {
         current_Layer.handle(request,response,next);
-        request.url = request.url.substr(current_Layer.pre_path.length) 
       } else {
         next();
       }
@@ -118,15 +107,12 @@ var myexpress = function() {
       var middleware = arguments[1];
     }
 
-
     layer = new Layer(path, middleware);
 
     if(typeof middleware.handle === "function") {
       for(var i=0;  i< middleware.stack.length; i++){
-        m = middleware.stack[i]
-        m.pre_path = layer.get_trim_path(path); 
-        m.path = layer.get_trim_path(path) + m.path; 
-        m.subapp_flag = true;
+        middleware.stack[i].path = layer.get_trim_path(path) + middleware.stack[i].path; 
+        middleware.stack[i].subapp_flag = true;
       }
       app.stack = app.stack.concat(middleware.stack);
     } else {
