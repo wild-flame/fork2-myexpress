@@ -136,7 +136,6 @@ var myexpress = function() {
   app.handle = app; 
 
   methods.forEach(function(method){
-    console.log("method: " + method)
     app[method] = function(path, handler) {
       app.use(path, makeRoute(method, handler), {end: true});
     }
