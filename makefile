@@ -49,6 +49,9 @@ handleMethod_t:
 prefix_t:
 	mocha verify -R spec -g "Prefix path trimming"
 
+getMethod_t:
+	mocha verify -R spec -g "App get method"
+
 .PHONY: lesson4_t lesson4_m lesson5_t lesson5_m lesson6_t
 
 

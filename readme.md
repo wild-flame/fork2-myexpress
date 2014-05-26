@@ -85,3 +85,7 @@ Instance 和 Object
 # LESSON 6
 
 不知道在Javascript `this.foo = xxx` 和 `function() { var foo; foo = xxx }` 有什么区别啊？
+
+# Lesson 7
+
+关于Constructor的概念。

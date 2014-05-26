@@ -1,5 +1,6 @@
 var http = require("http");
-var Layer = require("./lib/layer.js")
+var Layer = require("./lib/layer.js");
+var makeRoute = require("./lib/route.js");
 var myexpress = function() {
   var index=0;
   var current_Middleware;
@@ -34,13 +35,10 @@ var myexpress = function() {
         }
       } 
 
-
-
       current_Middleware = current_Layer.handle;
       var match_result = current_Layer.match(request.url);
       // Let response be able to get params
       request.ori_url = request.url; //Add ori_url to remember original request
-
 
       // TODO:重构这段代码，这段代码重复写了两次，可以写到一个函数里面。
       try{
@@ -113,28 +111,36 @@ var myexpress = function() {
     if (arguments.length == 1) {
       var path = "/";
       var middleware = arguments[0];
+      var options = arguments[1]
     } else {
       var path = arguments[0];
       var middleware = arguments[1];
+      var options = arguments[2]
     }
 
     layer = new Layer(path, middleware);
 
     if(typeof middleware.handle === "function") {
       for(var i=0;  i< middleware.stack.length; i++){
-
         middleware.stack[i].ori_path = middleware.stack[i].path; 
         middleware.stack[i].path = layer.get_trim_path(path) + middleware.stack[i].path; 
       }
       app.stack = app.stack.concat(middleware.stack);
     } else {
+      layer.match_options = options;
       app.stack.push(layer);
     }
   }
 
   app.handle = app; 
+
+  app.get = function(path,handler) {
+    app.use(path, makeRoute("GET", handler), {end: true});
+  }
+
   return app;
 }
 
+     
 module.exports = myexpress;
 

@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "bin" : {
+  "bin": {
     "myexpress": "bin/myexpress"
   },
   "author": "David Lin - Taffyer",
@@ -15,5 +15,8 @@
     "chai": "~1.9.1",
     "mocha": "~1.19.0",
     "supertest": "~0.12.1"
+  },
+  "dependencies": {
+    "methods": "~0.1.0"
   }
 }
