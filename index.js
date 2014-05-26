@@ -1,6 +1,7 @@
 var http = require("http");
 var Layer = require("./lib/layer.js");
 var makeRoute = require("./lib/route.js");
+var methods = require("methods")
 var myexpress = function() {
   var index=0;
   var current_Middleware;
@@ -134,13 +135,16 @@ var myexpress = function() {
 
   app.handle = app; 
 
-  app.get = function(path,handler) {
-    app.use(path, makeRoute("GET", handler), {end: true});
-  }
+  methods.forEach(function(method){
+    console.log("method: " + method)
+    app[method] = function(path, handler) {
+      app.use(path, makeRoute(method, handler), {end: true});
+    }
+  });
 
   return app;
 }
 
-     
+
 module.exports = myexpress;
 
