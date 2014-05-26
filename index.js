@@ -8,14 +8,15 @@ var myexpress = function() {
 
   var app = function(request, response) {
 
-      console.log("============================");
+    // Uncomment this for dubug
+    //console.log("============================");
 
     // The `next` function call which the next middleware 
     var next = function(err){
       index = index + 1;
 
       // Uncomment this for dubug
-      // console.log("[CALL `next]");
+      console.log("[CALL `next]");
 
       current_Layer = app.stack[index];
       if (current_Layer == undefined) {
@@ -31,21 +32,28 @@ var myexpress = function() {
         }
       } 
 
-      console.log("app.stack.handle is: " + app.stack[index].handle);
-      console.log("request.url: " + request.url +"\t current_Layer.path :"+  current_Layer.path);
+      //console.log("app.stack.handle is: " + app.stack[index].handle);
+      //console.log("request.url: " + request.url +"\t current_Layer.path :"+  current_Layer.path);
+      
+      // Do something with the request.url 
+       
+      current_Middleware = current_Layer.handle;
 
-      current_Middleware = current_Layer.handle
-        try{
-          if (current_Middleware.length < 4 && err == undefined && current_Layer.match(request.url)) {
-            current_Middleware(request,response,next);
-          } else if (current_Middleware.length == 4 && err != undefined && current_Layer.match(request.url)) {
-            current_Middleware(err,request,response,next);
-          } else {
-            next(err);
-          }
-        } catch(e) {
-          next(e);
+      try{
+        if (current_Middleware.length < 4 && err == undefined && current_Layer.match(request.url)) {
+          response.params = current_Layer.match(request.url).params;
+          current_Middleware(request,response,next);
+          request.url = request.url.substr(current_Layer.pre_path.length) 
+        } else if (current_Middleware.length == 4 && err != undefined && current_Layer.match(request.url)) {
+          request.params = current_Layer.match(request.url).params;
+          current_Middleware(err,request,response,next);
+          request.url = request.url.substr(current_Layer.pre_path.length) 
+        } else {
+          next(err);
         }
+      } catch(e) {
+        next(e);
+      }
 
     }
 
@@ -58,13 +66,35 @@ var myexpress = function() {
 
     // TODO:重构这段代码
     // return 500 for uncaught error
+    //
+    //
+    // THE INIT MIDDLEWARE 
+    current_Layer = app.stack[0];
+    console.log("current_Layer.path: " + current_Layer.path);
+    console.log("current_Layer.pre_path: " + current_Layer.pre_path);
+
+    console.log("request.url[before]:  " + request.url);
+    console.log("pre_path.length: " + current_Layer.pre_path.length);
+
+    console.log("request.url:  " + request.url);
+
+    if (current_Layer.match(request.url) && current_Layer.subapp = ture) 
+    {  
+        request.url = request.url.substr(current_Layer.pre_path.length) 
+    }
+    if (current_Layer.match(request.url)) {
+      request.params = current_Layer.match(request.url).params;
+    } else {
+      request.params = {};
+    }
+
     try{
-      current_Layer = app.stack[0]
-        if (current_Layer.match(request.url)) {
-          current_Layer.handle(request,response,next);
-        } else {
-          next();
-        }
+      if (current_Layer.match(request.url)) {
+        current_Layer.handle(request,response,next);
+        request.url = request.url.substr(current_Layer.pre_path.length) 
+      } else {
+        next();
+      }
     } catch(e) {
       next(e);
     }
@@ -88,15 +118,25 @@ var myexpress = function() {
       var middleware = arguments[1];
     }
 
+
     layer = new Layer(path, middleware);
-    if (middleware.stack != undefined) {
+
+    if(typeof middleware.handle === "function") {
+      for(var i=0;  i< middleware.stack.length; i++){
+        m = middleware.stack[i]
+        m.pre_path = layer.get_trim_path(path); 
+        m.path = layer.get_trim_path(path) + m.path; 
+        m.subapp_flag = true;
+      }
       app.stack = app.stack.concat(middleware.stack);
     } else {
       app.stack.push(layer);
     }
   }
 
+  app.handle = app; 
   return app;
 }
 
 module.exports = myexpress;
+

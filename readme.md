@@ -81,3 +81,7 @@
 Instance 和 Object
 
 不知道 request.url 和 request.path 有什么区别
+
+# LESSON 6
+
+不知道在Javascript `this.foo = xxx` 和 `function() { var foo; foo = xxx }` 有什么区别啊？

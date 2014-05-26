@@ -39,4 +39,16 @@ matchPath_t:
 errorHandlerMatch_t:
 	mocha verify -R spec -g 'The error handlers called should match request path:'
 
-.PHONY: lesson4_t lesson4_m lesson5_t lesson5_m
+lesson6_t: pathParameters_t reqParams_t handleMethod_t prefix_t
+pathParameters_t:
+	mocha verify -R spec -g 'Path parameters extraction'
+reqParams_t:
+	mocha verify -R spec -g "Implement req.params"
+handleMethod_t:
+	mocha verify -R spec -g "app should have the handle method"
+prefix_t:
+	mocha verify -R spec -g "Prefix path trimming"
+
+.PHONY: lesson4_t lesson4_m lesson5_t lesson5_m lesson6_t
+
+
