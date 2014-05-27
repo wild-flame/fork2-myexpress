@@ -11,10 +11,35 @@ var myexpress = function() {
 
   var app = function(request, response) {
 
-    // Uncomment this for dubug
-    //console.log("============================");
+    var callMiddleware = function(current_Layer, err) { 
+      current_Middleware = current_Layer.handle;
+      var match_result = current_Layer.match(request.url);
+      // Let response be able to get params
+      request.ori_url = request.url; //Add ori_url to remember original request
 
-    // The `next` function call which the next middleware 
+      if (match_result) {
+        request.params = match_result.params;
+        if (current_Layer.ori_path != undefined) 
+          // Do something with the request.url 
+          request.url = current_Layer.ori_path;
+      } else {
+        request.params = {};
+      }
+
+      try{
+        if (current_Middleware.length < 4 && err == undefined && match_result) {
+          current_Middleware(request,response,next);
+        } else if (current_Middleware.length == 4 && err != undefined && match_result) {
+          current_Middleware(err,request,response,next);
+        } else {
+          next(err);
+        }
+      } catch(e) {
+        next(e);
+      }
+    } //=============== END of FUNCTION `callMiddleware =================
+
+    // The `next` function  
     var next = function(err){
       request.url = request.ori_url;
       index = index + 1;
@@ -35,31 +60,7 @@ var myexpress = function() {
           return;
         }
       } 
-
-      current_Middleware = current_Layer.handle;
-      var match_result = current_Layer.match(request.url);
-      // Let response be able to get params
-      request.ori_url = request.url; //Add ori_url to remember original request
-
-      // TODO:重构这段代码，这段代码重复写了两次，可以写到一个函数里面。
-      try{
-        if (current_Middleware.length < 4 && err == undefined && match_result) {
-          response.params = match_result.params;
-          if (current_Layer.ori_path != undefined) 
-             request.url = current_Layer.ori_path;
-          current_Middleware(request,response,next);
-        } else if (current_Middleware.length == 4 && err != undefined && match_result) {
-          request.params = match_result.params;
-          if (current_Layer.ori_path != undefined) 
-             request.url = current_Layer.ori_path;
-          current_Middleware(err,request,response,next);
-        } else {
-          next(err);
-        }
-      } catch(e) {
-        next(e);
-      }
-
+      callMiddleware(current_Layer, err)
     }
 
     // Responde 404 if no middleware is added
@@ -68,36 +69,9 @@ var myexpress = function() {
       response.end();
       return;
     }
-
-    // TODO:重构这段代码
-    //
-    // THE INIT MIDDLEWARE 
     current_Layer = app.stack[0];
-
-    var match_result = current_Layer.match(request.url);
-
-    request.ori_url = request.url; //Add ori_url to remember original request
-
-    if (match_result) {
-      request.params = match_result.params;
-      if (current_Layer.ori_path != undefined) 
-        // Do something with the request.url 
-        request.url = current_Layer.ori_path;
-    } else {
-      request.params = {};
-    }
-
-    try{
-      if (match_result) {
-        current_Layer.handle(request,response,next);
-      } else {
-        next();
-      }
-    } catch(e) {
-      // return 500 for uncaught error
-      next(e);
-    }
-  } 
+    callMiddleware(current_Layer);
+  } //=============== END of FUNCTION `next` ========================
 
   app.listen = function(port,callback) {
     var server = http.createServer(this,callback);
@@ -108,7 +82,6 @@ var myexpress = function() {
   app.stack = [];
 
   app.use = function(){
-
     if (arguments.length == 1) {
       var path = "/";
       var middleware = arguments[0];
