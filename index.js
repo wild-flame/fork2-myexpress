@@ -70,7 +70,6 @@ var myexpress = function() {
     }
 
     // TODO:重构这段代码
-    // return 500 for uncaught error
     //
     // THE INIT MIDDLEWARE 
     current_Layer = app.stack[0];
@@ -95,6 +94,7 @@ var myexpress = function() {
         next();
       }
     } catch(e) {
+      // return 500 for uncaught error
       next(e);
     }
   } 
@@ -112,11 +112,11 @@ var myexpress = function() {
     if (arguments.length == 1) {
       var path = "/";
       var middleware = arguments[0];
-      var options = arguments[1]
+      var options = {end:false};
     } else {
       var path = arguments[0];
       var middleware = arguments[1];
-      var options = arguments[2]
+      var options = arguments[2] || {end:false}
     }
 
     layer = new Layer(path, middleware);
