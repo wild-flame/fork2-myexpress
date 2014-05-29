@@ -15,12 +15,12 @@ describe("app",function() {
     }); 
   });
 
-  describe("#listen", function() {
+  describe("#listen", function(done) {
     var server;
 
     // This is synchronos test
-    before(function(done) {
-      server = app.listen(7000,done);
+    before(function() {
+      server = app.listen(7000);
     });
 
     it("should return a http.Server", function(){
@@ -28,9 +28,7 @@ describe("app",function() {
     });
 
     it("should respond /foo with 404", function(done){
-      request("http://localhost:7000")
-      .get("/foo")
-      .expect(404, done)
+      request("http://localhost:7000").get("/foo").expect(404, done)
     });
   });
 });

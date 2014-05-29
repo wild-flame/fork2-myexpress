@@ -55,4 +55,13 @@ lesson7_t:
 
 .PHONY: lesson4_t lesson4_m lesson5_t lesson5_m lesson6_t
 
-
+lesson8_t:
+	mocha verify/route_spec.js -R spec -g "Add handlers to a route"
+	mocha verify/route_spec.js -R spec -g "calling next"
+	mocha verify/route_spec.js -R spec -g "error handling"
+	mocha verify/route_spec.js -R spec -g "verb matching"
+	mocha verify/route_spec.js -R spec -g "match any verb"
+	mocha verify/route_spec.js -R spec -g "calling next\(route\)"
+	mocha verify/route_spec.js -R spec -g "Implement Verbs For Route"
+	mocha verify/route_spec.js -R spec -g "Implement app.route"
+	mocha verify/route_spec.js -R spec -g "Implement Verbs For App"

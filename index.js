@@ -1,43 +1,42 @@
 var http = require("http");
 var Layer = require("./lib/layer.js");
 var makeRoute = require("./lib/route.js");
-var methods = require("methods")
+var methods = require("methods").concat("all");
 var myexpress = function() {
   var index=0;
-  var current_Middleware;
-  var current_Layer;
-
-  //TODO:可以重构这部分的代码，重复代码有些多
+  var currentHandle;
+  var currentLayer;
 
   var app = function(request, response) {
 
-    var callMiddleware = function(current_Layer, err) { 
-      current_Middleware = current_Layer.handle;
-      var match_result = current_Layer.match(request.url);
+    var callHandle = function(currentLayer, err) { 
+      currentHandle = currentLayer.handle;
+      var match_result = currentLayer.match(request.url);
       // Let response be able to get params
       request.ori_url = request.url; //Add ori_url to remember original request
 
       if (match_result) {
         request.params = match_result.params;
-        if (current_Layer.ori_path != undefined) 
+        if (currentLayer.ori_path != undefined) 
           // Do something with the request.url 
-          request.url = current_Layer.ori_path;
+          request.url = currentLayer.ori_path;
       } else {
         request.params = {};
       }
 
       try{
-        if (current_Middleware.length < 4 && err == undefined && match_result) {
-          current_Middleware(request,response,next);
-        } else if (current_Middleware.length == 4 && err != undefined && match_result) {
-          current_Middleware(err,request,response,next);
+        if (currentHandle.length < 4 && err == undefined && match_result) {
+          currentHandle(request,response,next);
+        } else if (currentHandle.length == 4 && err != undefined && match_result) {
+          currentHandle(err,request,response,next);
         } else {
           next(err);
         }
       } catch(e) {
+        console.error(e);
         next(e);
       }
-    } //=============== END of FUNCTION `callMiddleware =================
+    } //=============== END of FUNCTION `callHandle =================
 
     // The `next` function  
     var next = function(err){
@@ -47,8 +46,8 @@ var myexpress = function() {
       // Uncomment this for dubug
       //console.log("[CALL `next]");
 
-      current_Layer = app.stack[index];
-      if (current_Layer == undefined) {
+      currentLayer = app.stack[index];
+      if (currentLayer == undefined) {
         // ruturn 500 for unhandled error
         if (err) {
           response.statusCode = 500;
@@ -60,7 +59,8 @@ var myexpress = function() {
           return;
         }
       } 
-      callMiddleware(current_Layer, err)
+
+      callHandle(currentLayer, err)
     }
 
     // Responde 404 if no middleware is added
@@ -69,13 +69,13 @@ var myexpress = function() {
       response.end();
       return;
     }
-    current_Layer = app.stack[0];
-    callMiddleware(current_Layer);
+    currentLayer = app.stack[0];
+    callHandle(currentLayer);
   } //=============== END of FUNCTION `next` ========================
 
-  app.listen = function(port,callback) {
-    var server = http.createServer(this,callback);
-    server.listen(port,callback);
+  app.listen = function(port) {
+    var server = http.createServer(app);
+    server.listen(port);
     return server;
   }
 
@@ -84,22 +84,22 @@ var myexpress = function() {
   app.use = function(){
     if (arguments.length == 1) {
       var path = "/";
-      var middleware = arguments[0];
+      var handler = arguments[0];
       var options = {end:false};
     } else {
       var path = arguments[0];
-      var middleware = arguments[1];
+      var handler = arguments[1];
       var options = arguments[2] || {end:false}
     }
 
-    layer = new Layer(path, middleware);
+    layer = new Layer(path, handler);
 
-    if(typeof middleware.handle === "function") {
-      for(var i=0;  i< middleware.stack.length; i++){
-        middleware.stack[i].ori_path = middleware.stack[i].path; 
-        middleware.stack[i].path = layer.get_trim_path(path) + middleware.stack[i].path; 
+    if(typeof handler.handle === "function") {
+      for(var i=0;  i< handler.stack.length; i++){
+        handler.stack[i].ori_path = handler.stack[i].path; 
+        handler.stack[i].path = layer.get_trim_path(path) + handler.stack[i].path; 
       }
-      app.stack = app.stack.concat(middleware.stack);
+      app.stack = app.stack.concat(handler.stack);
     } else {
       layer.match_options = options;
       app.stack.push(layer);
@@ -108,15 +108,26 @@ var myexpress = function() {
 
   app.handle = app; 
 
+  app.route = function(path) {
+    var route = makeRoute();
+    app.use(path,route, {end:true});
+    return route;
+  }
+  
   methods.forEach(function(method){
     app[method] = function(path, handler) {
-      app.use(path, makeRoute(method, handler), {end: true});
+      var route = makeRoute();
+      app.use(path, route, {end:true});
+      route[method](handler);
+      return app;
     }
   });
+ 
 
   return app;
 }
 
 
 module.exports = myexpress;
+
 

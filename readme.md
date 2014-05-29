@@ -89,3 +89,45 @@ Instance 和 Object
 # Lesson 7
 
 关于Constructor的概念。
+
+== 和 === ：在Javascript里不要使用 == 和 != 
+
+# 读书笔记 《Node.js 开发指南》 人民邮电出版
+
+-   Javascript的对象机制是基于原型的，支持部分多重继承满吃过EventEmitter不会打乱对象原有的继承关系。
+
+-   全局作用域，在浏览器中是window而在Node.js里是global
+
+    -   在最外层定义的变量
+    -   全局对象的属性
+    -   任何地方隐式定义的变量（未定义直接赋值的变量） 
+    
+    第三大需要格外注意
+
+## 闭包
+
+当一个函数返回它内部定义的一个函数时，就产生了一个闭包，闭包不但包括这个被返回的函数，还包括这个函数的定义环境。
+
+## Javascript里面的面向对象
+
+在大部分语言里，比方说Ruby，python这种基于类的面向对象。但是Javascript里面没有类的概念，不是说Javascript不是面向对象的语言。
+
+## 关于构造函数和原型
+
+    function Foo() {
+      var innerVar = 'hello';
+      this.prop1 = "Taffyer";
+      this.func1 = function() {
+        innerVar = '';
+      };
+    }
+    Foo.prototype.prop2 = 'HIT';
+    Foo.prototype.fun2 = function() {
+      console.log(this.prop2);
+    }
+
+    var foo1 = new Foo();
+    var foo2 = new Foo();
+
+    console.log(foo1.func1 === foo2.fun1); // Out put false
+    consolg.log(foo1.func2 === foo2.fun2); // Out put true
