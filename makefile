@@ -65,3 +65,13 @@ lesson8_t:
 	mocha verify/route_spec.js -R spec -g "Implement Verbs For Route"
 	mocha verify/route_spec.js -R spec -g "Implement app.route"
 	mocha verify/route_spec.js -R spec -g "Implement Verbs For App"
+
+lesson9_t:
+	mocha verify/di_spec.js -R spec -g "app.factory"
+	mocha verify/di_spec.js -R spec -g "Handler Dependencies Analysis"
+	mocha verify/di_spec.js -R spec -g "load named dependencies"
+	mocha verify/di_spec.js -R spec -g "dependencies error handling"
+	mocha verify/di_spec.js -R spec -g "load bulitin dependencies"
+	mocha verify/di_spec.js -R spec -g "pass req and res to factories"
+	mocha verify/di_spec.js -R spec -g "Implement Injector Invokation"
+	mocha verify/di_spec.js -R spec -g "Implement app.inject"

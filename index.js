@@ -2,6 +2,8 @@ var http = require("http");
 var Layer = require("./lib/layer.js");
 var makeRoute = require("./lib/route.js");
 var methods = require("methods").concat("all");
+var createInjector = require("./lib/injector");
+
 var myexpress = function() {
   var index=0;
   var currentHandle;
@@ -61,7 +63,7 @@ var myexpress = function() {
       } 
 
       callHandle(currentLayer, err)
-    }
+    }//=============== END of FUNCTION `next` ========================
 
     // Responde 404 if no middleware is added
     if (app.stack[0] == undefined) {
@@ -71,8 +73,10 @@ var myexpress = function() {
     }
     currentLayer = app.stack[0];
     callHandle(currentLayer);
-  } //=============== END of FUNCTION `next` ========================
 
+
+
+  } 
   app.listen = function(port) {
     var server = http.createServer(app);
     server.listen(port);
@@ -123,6 +127,15 @@ var myexpress = function() {
     }
   });
  
+  app._factories = {}
+  app.factory = function(name,fn) {
+    app._factories[name] = fn;
+  }
+
+  app.inject = function(handler) {
+    injector = createInjector(handler, app);
+    return injector;
+  }
 
   return app;
 }

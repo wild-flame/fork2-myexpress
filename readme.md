@@ -131,3 +131,11 @@ Instance 和 Object
 
     console.log(foo1.func1 === foo2.fun1); // Out put false
     consolg.log(foo1.func2 === foo2.fun2); // Out put true
+
+# Lesson 9
+
+关于耦合度。在Javascript里一直有人提耦合度的概念，耦合度低的代码可读性好。
+
+## 回调函数 Callback
+
+又掉了一次坑。。。回调函数没有执行。每一次掉坑完毕之后，对于回调的理解就更深一层次，还是回归原始，回调函数其实就是把函数作为参数传过去（沿袭C的说法就是函数的指针传过去，所以传过去的仅仅是指针而已，并不是返回值，函数并没有被执行！！）
