@@ -3,25 +3,30 @@ var Layer = require("./lib/layer.js");
 var makeRoute = require("./lib/route.js");
 var methods = require("methods").concat("all");
 var createInjector = require("./lib/injector");
+var _request = require("./lib/request");
+var _response = require("./lib/response");
 
 var myexpress = function() {
   var index=0;
   var currentHandle;
   var currentLayer;
 
-  var app = function(request, response) {
+  var app = function(request, response, ori_next) {
 
     var callHandle = function(currentLayer, err) { 
+
       currentHandle = currentLayer.handle;
       var match_result = currentLayer.match(request.url);
       // Let response be able to get params
-      request.ori_url = request.url; //Add ori_url to remember original request
 
       if (match_result) {
+        if (currentLayer.subapp === true) {
+          request.ori_url = request.url; //Add ori_url to remember original request
+          request.ori_app = request.app
+          request.url = request.url.substr(match_result.path.length); 
+          request.subapp = currentLayer.subapp;
+        }
         request.params = match_result.params;
-        if (currentLayer.ori_path != undefined) 
-          // Do something with the request.url 
-          request.url = currentLayer.ori_path;
       } else {
         request.params = {};
       }
@@ -42,7 +47,6 @@ var myexpress = function() {
 
     // The `next` function  
     var next = function(err){
-      request.url = request.ori_url;
       index = index + 1;
 
       // Uncomment this for dubug
@@ -52,10 +56,24 @@ var myexpress = function() {
       if (currentLayer == undefined) {
         // ruturn 500 for unhandled error
         if (err) {
+          if (request.subapp === true) {
+            request.url = request.ori_url;
+            request.subapp = false;
+            request.app = request.ori_app
+            ori_next(err);
+            return;
+          }
           response.statusCode = 500;
           response.end("Internal Serve Error");
           return;
         } else {
+          if (request.subapp === true) {
+            request.url = request.ori_url;
+            request.subapp = false;
+            request.app = request.ori_app
+            ori_next();
+            return;
+          }
           response.statusCode = 404;
           response.end("Page Not Found");
           return;
@@ -65,16 +83,22 @@ var myexpress = function() {
       callHandle(currentLayer, err)
     }//=============== END of FUNCTION `next` ========================
 
+    app.monkey_patch(request,response);
+
     // Responde 404 if no middleware is added
     if (app.stack[0] == undefined) {
+      if (request.subapp === true) {
+        request.url = request.ori_url;
+        request.subapp = false;
+        ori_next();
+        return;
+      }
       response.statusCode = 404;
       response.end();
       return;
     }
     currentLayer = app.stack[0];
     callHandle(currentLayer);
-
-
 
   } 
   app.listen = function(port) {
@@ -96,14 +120,11 @@ var myexpress = function() {
       var options = arguments[2] || {end:false}
     }
 
-    layer = new Layer(path, handler);
+    var layer = new Layer(path, handler);
 
     if(typeof handler.handle === "function") {
-      for(var i=0;  i< handler.stack.length; i++){
-        handler.stack[i].ori_path = handler.stack[i].path; 
-        handler.stack[i].path = layer.get_trim_path(path) + handler.stack[i].path; 
-      }
-      app.stack = app.stack.concat(handler.stack);
+      layer.subapp = true;
+      app.stack.push(layer);
     } else {
       layer.match_options = options;
       app.stack.push(layer);
@@ -136,6 +157,16 @@ var myexpress = function() {
     injector = createInjector(handler, app);
     return injector;
   }
+
+  app.monkey_patch = function(req,res) {
+    _request.__proto__ = req.constructor.prototype;
+    _response.__proto__ = res.constructor.prototype;
+    req.__proto__ = _request;
+    res.__proto__ = _response;
+    req.app = app;
+    req.res = res;
+    res.req = req;
+  } 
 
   return app;
 }

@@ -75,3 +75,10 @@ lesson9_t:
 	mocha verify/di_spec.js -R spec -g "pass req and res to factories"
 	mocha verify/di_spec.js -R spec -g "Implement Injector Invokation"
 	mocha verify/di_spec.js -R spec -g "Implement app.inject"
+
+lesson10_t:
+	mocha verify/monkey_spec.js -R spec -g "Monkey patch req and res"
+	mocha verify/monkey_spec.js -R spec -g "Monkey patch before serving"
+	mocha verify/monkey_spec.js -R spec -g "Setting req.app"
+	mocha verify/monkey_spec.js -R spec -g 'req.res and res.req'
+	mocha verify/monkey_spec.js -R spec -g "HTTP redirect"
