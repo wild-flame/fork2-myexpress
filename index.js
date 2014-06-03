@@ -63,7 +63,7 @@ var myexpress = function() {
             ori_next(err);
             return;
           }
-          response.statusCode = 500;
+          response.statusCode = err.statusCode || 500;
           response.end("Internal Serve Error");
           return;
         } else {
@@ -167,6 +167,7 @@ var myexpress = function() {
     req.res = res;
     res.req = req;
   } 
+
 
   return app;
 }

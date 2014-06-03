@@ -150,3 +150,19 @@ Instance 和 Object
     at TCP.onread (net.js:525:27)
 
 后来发现是把`require("../lib/response")`写成了`require("../lib/request")`, 尽管两个文件的内容是一样的，但由于require的cache的机制就出现了问题。
+
+# LESSON 12
+
+原本的字符串并不是`instanceof String`
+可以用`typeof "foo" === "string"`来做判断
+
+有一个测试没过，我感觉测试是写错了吧。在Etag的前后不需要各加一个`"`，本身就是字符串了呀。
+
+    .expect("ETag",'"1306201125"')
+
+应该是
+
+    .expect("ETag","1306201125")
+
+# LESSON 13
+

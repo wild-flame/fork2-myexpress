@@ -82,3 +82,25 @@ lesson10_t:
 	mocha verify/monkey_spec.js -R spec -g "Setting req.app"
 	mocha verify/monkey_spec.js -R spec -g 'req.res and res.req'
 	mocha verify/monkey_spec.js -R spec -g "HTTP redirect"
+
+lesson11_t:
+	mocha verify/nego_spec.js -R spec -g 'sets the content-type'
+	mocha verify/nego_spec.js -R spec -g 'sets the default content type'
+	mocha verify/nego_spec.js -R spec -g 'Respond with different formats'
+	mocha verify/nego_spec.js -R spec -g 'responds with 406'
+
+lesson12_t:
+	mocha verify/send_spec.js -R spec -g "support buffer and string body"
+	mocha verify/send_spec.js -R spec -g "sets content-length"
+	mocha verify/send_spec.js -R spec -g "sets status code"
+	mocha verify/send_spec.js -R spec -g "JSON response"
+	mocha verify -R spec -g 'Calculate Etag'
+	mocha verify -R spec -g 'ETag 304'
+	mocha verify -R spec -g 'Last-Modified 304'
+
+lesson13_t:
+	mocha verify/sendfile_spec.js -R spec -g "stream data"
+	mocha verify/sendfile_spec.js -R spec -g 'stream file data'
+	mocha verify/sendfile_spec.js -R spec -g 'content headers'
+	mocha verify/sendfile_spec.js -R spec -g 'path checking'
+	mocha verify/sendfile_spec.js -R spec -g 'Range support'
